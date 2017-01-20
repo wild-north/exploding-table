@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Explosion v.1.0</title>
+</head>
+<body>
+
+</body>
+<script>
+    var TABLE_SIZE = 10;
+    var CELL_SIZE = '40px';
+    var DELAY = 20;
+    var dimensions = {
+        LEFT: 'LEFT',
+        RIGHT: 'RIGHT',
+        UP: 'UP',
+        DOWN: 'DOWN',
+        UP_AND_LEFT: 'UP_AND_LEFT',
+        UP_AND_RIGHT: 'UP_AND_RIGHT',
+        DOWN_AND_LEFT: 'DOWN_AND_LEFT',
+        DOWN_AND_RIGHT: 'DOWN_AND_RIGHT'
+    };
+    var borders = {
+        TOP: 'TOP',
+        BOTTOM: 'BOTTOM',
+        LEFT: 'LEFT',
+        RIGHT: 'RIGHT'
+    };
+    var PX = 'px';
+    var MIN_STEP = 2;
+    var MAX_STEP = 5;
+    var tableId = getUniqueId();
+    var intervalIndex = -1;
+
+
+    addCommonStyles(tableId);
+    var dimensionsList = getDimensionsList(dimensions);
+    var t = renderTable(TABLE_SIZE);
+    var config = getCellsConfig(t);
+    positionTable(t);
+    t.addEventListener('click', function () {
+        intervalIndex < 0 ? explodeTable() : stopExplosion();
+    });
+
+    function renderTable(size, wrapper) {
+        wrapper = wrapper || document.body;
+        size = size || 10;
+        var table = document.createElement('table');
+        table.id = tableId;
+        for (var i = 0; i < size; i++) {
+            var tr = document.createElement('tr');
+            for (var j = 0; j < size; j++) {
+                var td = document.createElement('td');
+                td.textContent = getRandomInteger(0, 100);
+                var color = getHexColorPair();
+                td.style.backgroundColor = color.main;
+                td.style.color = color.inverted;
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+        wrapper.appendChild(table);
+        return table;
+    }
+
+    function positionTable(table) {
+        table.style.position = 'absolute';
+        table.style.top = window.innerHeight / 2 - table.clientHeight / 2 + PX;
+        table.style.left = window.innerWidth / 2 - table.clientWidth / 2 + PX;
+
+
+        for (var i = 0; i < config.length; i++) {
+            config[i].td.style.position = 'absolute';
+            config[i].td.style.top = config[i].defaults.top + PX;
+            config[i].td.style.left = config[i].defaults.left + PX;
+        }
+    }
+
+    function explodeTable() {
+        intervalIndex = setInterval(animateTable, DELAY);
+    }
+
+    function stopExplosion () {
+        clearInterval(intervalIndex);
+        intervalIndex = -1;
+    }
+
+    function animateTable() {
+        for (var i = 0; i < config.length; i++) {
+            move(config[i]);
+        }
+    }
+
+    function move(cellConfig) {
+        switch (cellConfig.dimension) {
+            case dimensions.LEFT:
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.RIGHT:
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.UP:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.DOWN:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.UP_AND_LEFT:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.UP_AND_RIGHT:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.DOWN_AND_LEFT:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+            case dimensions.DOWN_AND_RIGHT:
+                cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
+                break;
+        }
+        checkAndChangeDimensionIfNeed(cellConfig);
+    }
+
+    function checkAndChangeDimensionIfNeed(cellConfig) {
+        var clientData = cellConfig.td.getBoundingClientRect();
+
+        if (clientData.top <= 0) {
+            reflectFromTopBorder(cellConfig);
+        } else if (clientData.bottom >= window.innerHeight) {
+            reflectFromBottomBorder(cellConfig);
+        } else if (clientData.left <= 0) {
+            reflectFromLeftBorder(cellConfig);
+        } else if (clientData.right >= window.innerWidth) {
+            reflectFromRightBorder(cellConfig);
+        }
+    }
+
+    function reflectFromTopBorder(cellConfig) {
+        switch (cellConfig.dimension) {
+            case dimensions.UP:
+                cellConfig.dimension = getRandomDimension([dimensions.DOWN, dimensions.DOWN_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
+                break;
+            case dimensions.UP_AND_LEFT:
+                cellConfig.dimension = dimensions.DOWN_AND_LEFT;
+                break;
+            case dimensions.UP_AND_RIGHT:
+                cellConfig.dimension = dimensions.DOWN_AND_RIGHT;
+                break;
+        }
+    }
+    function reflectFromBottomBorder(cellConfig) {
+        switch (cellConfig.dimension) {
+            case dimensions.DOWN:
+                cellConfig.dimension = getRandomDimension([dimensions.UP, dimensions.UP_AND_LEFT, dimensions.UP_AND_RIGHT]);
+                break;
+            case dimensions.DOWN_AND_LEFT:
+                cellConfig.dimension = dimensions.UP_AND_LEFT;
+                break;
+            case dimensions.DOWN_AND_RIGHT:
+                cellConfig.dimension = dimensions.UP_AND_LEFT;
+                break;
+        }
+    }
+    function reflectFromLeftBorder(cellConfig) {
+        switch (cellConfig.dimension) {
+            case dimensions.LEFT:
+                cellConfig.dimension = getRandomDimension([dimensions.RIGHT, dimensions.UP_AND_RIGHT, dimensions.DOWN_AND_RIGHT]);
+                break;
+            case dimensions.DOWN_AND_LEFT:
+                cellConfig.dimension = dimensions.DOWN_AND_RIGHT;
+                break;
+            case dimensions.UP_AND_LEFT:
+                cellConfig.dimension = dimensions.UP_AND_RIGHT;
+                break;
+        }
+    }
+    function reflectFromRightBorder(cellConfig) {
+        switch (cellConfig.dimension) {
+            case dimensions.RIGHT:
+                cellConfig.dimension = getRandomDimension([dimensions.LEFT, dimensions.UP_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
+                break;
+            case dimensions.DOWN_AND_RIGHT:
+                cellConfig.dimension = dimensions.DOWN_AND_LEFT;
+                break;
+            case dimensions.UP_AND_RIGHT:
+                cellConfig.dimension = dimensions.UP_AND_LEFT;
+                break;
+        }
+    }
+
+    function getCellsConfig(table) {
+        var config = [];
+        var cellsList = table.getElementsByTagName('td');
+        for (var i = 0; i < cellsList.length; i++) {
+            config.push({
+                td: cellsList[i],
+                defaults: {
+                    top: cellsList[i].offsetTop,
+                    left: cellsList[i].offsetLeft
+                },
+                dimension: getRandomDimension()
+            });
+        }
+        return config;
+    }
+
+    function getRandomDimension(list) {
+        list = list || dimensionsList;
+        return list[getRandomInteger(0, list.length - 1)];
+    }
+
+    function getDimensionsList() {
+        var list = [];
+        for (var i in dimensions) {
+            if (dimensions.hasOwnProperty(i)) {
+                list.push(i);
+            }
+        }
+        return list;
+    }
+
+    function getRandomHexColor() {
+        var symbolsQty = 6;
+        var hexColor = '#';
+        for (var i = 0; i < symbolsQty; i++) {
+            hexColor += getRandomInteger(0, 15).toString(16);
+        }
+        return hexColor;
+    }
+
+    function getInvertedHexColor(hexColor) {
+        var color = hexColor;
+        color = color.substring(1);           // remove #
+        color = parseInt(color, 16);          // convert to integer
+        color = 0xFFFFFF ^ color;             // invert three bytes
+        color = color.toString(16);           // convert to hex
+        color = ("000000" + color).slice(-6); // pad with leading zeros
+        return "#" + color;
+    }
+
+    function getHexColorPair() {
+        var mainColor = getRandomHexColor();
+        var invertedColor = getInvertedHexColor(mainColor);
+        return {
+            main: mainColor,
+            inverted: invertedColor
+        }
+    }
+
+    function getRandomInteger(min, max) {
+        var rand = min - 0.5 + Math.random() * (max - min + 1)
+        rand = Math.round(rand);
+        return rand;
+    }
+
+    function addCommonStyles(tableId) {
+        var styleElement = document.createElement('style');
+        styleElement.innerText = "#" + tableId + " td { " +
+                                    "text-align: center; " +
+                                    "cursor: pointer; " +
+                                    "line-height: " + CELL_SIZE + "; " +
+                                    "height: " + CELL_SIZE + "; " +
+                                    "width: " + CELL_SIZE + "; " +
+                                  "}";
+        styleElement.async = false;
+        document.getElementsByTagName('head')[0].appendChild(styleElement);
+    }
+
+    function getUniqueId() {
+        var length = 15;
+        var result = '_';
+        for (var i = 0; i < length; i++) {
+            result += getRandomInteger(0, 15).toString(16);
+        }
+        return result;
+    }
+</script>
+</html>
+
+
+
+
+
