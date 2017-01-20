@@ -9,8 +9,8 @@
 </body>
 <script>
     var TABLE_SIZE = 10;
-    var CELL_SIZE = '40px';
-    var DELAY = 20;
+    var CELL_SIZE = '30px';
+    var DELAY = 25;
     var dimensions = {
         LEFT: 'LEFT',
         RIGHT: 'RIGHT',
@@ -28,8 +28,8 @@
         RIGHT: 'RIGHT'
     };
     var PX = 'px';
-    var MIN_STEP = 2;
-    var MAX_STEP = 5;
+    var MIN_STEP = 3;
+    var MAX_STEP = 9;
     var tableId = getUniqueId();
     var intervalIndex = -1;
 
@@ -53,9 +53,7 @@
             for (var j = 0; j < size; j++) {
                 var td = document.createElement('td');
                 td.textContent = getRandomInteger(0, 100);
-                var color = getHexColorPair();
-                td.style.backgroundColor = color.main;
-                td.style.color = color.inverted;
+                changeCellColor(td);
                 tr.appendChild(td);
             }
             table.appendChild(tr);
@@ -128,15 +126,23 @@
 
     function checkAndChangeDimensionIfNeed(cellConfig) {
         var clientData = cellConfig.td.getBoundingClientRect();
+        var shouldReflect = false;
 
         if (clientData.top <= 0) {
             reflectFromTopBorder(cellConfig);
+            shouldReflect = true;
         } else if (clientData.bottom >= window.innerHeight) {
             reflectFromBottomBorder(cellConfig);
+            shouldReflect = true;
         } else if (clientData.left <= 0) {
             reflectFromLeftBorder(cellConfig);
+            shouldReflect = true;
         } else if (clientData.right >= window.innerWidth) {
             reflectFromRightBorder(cellConfig);
+            shouldReflect = true;
+        }
+        if (shouldReflect) {
+            changeCellColor(cellConfig.td);
         }
     }
 
@@ -162,7 +168,7 @@
                 cellConfig.dimension = dimensions.UP_AND_LEFT;
                 break;
             case dimensions.DOWN_AND_RIGHT:
-                cellConfig.dimension = dimensions.UP_AND_LEFT;
+                cellConfig.dimension = dimensions.UP_AND_RIGHT;
                 break;
         }
     }
@@ -224,6 +230,12 @@
         return list;
     }
 
+    function changeCellColor(cell) {
+        var color = getHexColorPair();
+        cell.style.backgroundColor = color.main;
+        cell.style.color = color.inverted;
+    }
+
     function getRandomHexColor() {
         var symbolsQty = 6;
         var hexColor = '#';
@@ -266,6 +278,7 @@
                                     "line-height: " + CELL_SIZE + "; " +
                                     "height: " + CELL_SIZE + "; " +
                                     "width: " + CELL_SIZE + "; " +
+                                    "border-radius: 50%" +
                                   "}";
         styleElement.async = false;
         document.getElementsByTagName('head')[0].appendChild(styleElement);
