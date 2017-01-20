@@ -11,7 +11,7 @@
     var TABLE_SIZE = 10;
     var CELL_SIZE = '30px';
     var DELAY = 25;
-    var dimensions = {
+    var directions = {
         LEFT: 'LEFT',
         RIGHT: 'RIGHT',
         UP: 'UP',
@@ -35,7 +35,7 @@
 
 
     addCommonStyles(tableId);
-    var dimensionsList = getDimensionsList(dimensions);
+    var directionsList = getDirectionsList(directions);
     var t = renderTable(TABLE_SIZE);
     var config = getCellsConfig(t);
     positionTable(t);
@@ -91,53 +91,54 @@
     }
 
     function move(cellConfig) {
-        switch (cellConfig.dimension) {
-            case dimensions.LEFT:
+        switch (cellConfig.direction) {
+            case directions.LEFT:
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.RIGHT:
+            case directions.RIGHT:
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.UP:
+            case directions.UP:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.DOWN:
+            case directions.DOWN:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.UP_AND_LEFT:
+            case directions.UP_AND_LEFT:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.UP_AND_RIGHT:
+            case directions.UP_AND_RIGHT:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.DOWN_AND_LEFT:
+            case directions.DOWN_AND_LEFT:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) - getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
-            case dimensions.DOWN_AND_RIGHT:
+            case directions.DOWN_AND_RIGHT:
                 cellConfig.td.style.top = parseInt(cellConfig.td.style.top) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 cellConfig.td.style.left = parseInt(cellConfig.td.style.left) + getRandomInteger(MIN_STEP, MAX_STEP) + PX;
                 break;
         }
-        checkAndChangeDimensionIfNeed(cellConfig);
+        checkAndChangeDirectionIfNeed(cellConfig);
     }
 
-    function checkAndChangeDimensionIfNeed(cellConfig) {
+    function checkAndChangeDirectionIfNeed(cellConfig) {
         var clientData = cellConfig.td.getBoundingClientRect();
         var shouldReflect = false;
+        var extraSpace = MAX_STEP * 3;
 
-        if (clientData.top <= 0) {
+        if (clientData.top <= extraSpace) {
             reflectFromTopBorder(cellConfig);
             shouldReflect = true;
-        } else if (clientData.bottom >= window.innerHeight) {
+        } else if (clientData.bottom >= window.innerHeight - extraSpace) {
             reflectFromBottomBorder(cellConfig);
             shouldReflect = true;
-        } else if (clientData.left <= 0) {
+        } else if (clientData.left <= extraSpace) {
             reflectFromLeftBorder(cellConfig);
             shouldReflect = true;
-        } else if (clientData.right >= window.innerWidth) {
+        } else if (clientData.right >= window.innerWidth - extraSpace) {
             reflectFromRightBorder(cellConfig);
             shouldReflect = true;
         }
@@ -147,16 +148,16 @@
     }
 
     function reflectFromTopBorder(cellConfig) {
-        cellConfig.dimension = getRandomDimension([dimensions.DOWN, dimensions.DOWN_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
+        cellConfig.direction = getRandomDirection([directions.DOWN, directions.DOWN_AND_LEFT, directions.DOWN_AND_RIGHT]);
     }
     function reflectFromBottomBorder(cellConfig) {
-        cellConfig.dimension = getRandomDimension([dimensions.UP, dimensions.UP_AND_LEFT, dimensions.UP_AND_RIGHT]);
+        cellConfig.direction = getRandomDirection([directions.UP, directions.UP_AND_LEFT, directions.UP_AND_RIGHT]);
     }
     function reflectFromLeftBorder(cellConfig) {
-        cellConfig.dimension = getRandomDimension([dimensions.RIGHT, dimensions.UP_AND_RIGHT, dimensions.DOWN_AND_RIGHT]);
+        cellConfig.direction = getRandomDirection([directions.RIGHT, directions.UP_AND_RIGHT, directions.DOWN_AND_RIGHT]);
     }
     function reflectFromRightBorder(cellConfig) {
-        cellConfig.dimension = getRandomDimension([dimensions.LEFT, dimensions.UP_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
+        cellConfig.direction = getRandomDirection([directions.LEFT, directions.UP_AND_LEFT, directions.DOWN_AND_RIGHT]);
     }
 
     function getCellsConfig(table) {
@@ -169,21 +170,21 @@
                     top: cellsList[i].offsetTop,
                     left: cellsList[i].offsetLeft
                 },
-                dimension: getRandomDimension()
+                direction: getRandomDirection()
             });
         }
         return config;
     }
 
-    function getRandomDimension(list) {
-        list = list || dimensionsList;
+    function getRandomDirection(list) {
+        list = list || directionsList;
         return list[getRandomInteger(0, list.length - 1)];
     }
 
-    function getDimensionsList() {
+    function getDirectionsList() {
         var list = [];
-        for (var i in dimensions) {
-            if (dimensions.hasOwnProperty(i)) {
+        for (var i in directions) {
+            if (directions.hasOwnProperty(i)) {
                 list.push(i);
             }
         }
