@@ -147,56 +147,16 @@
     }
 
     function reflectFromTopBorder(cellConfig) {
-        switch (cellConfig.dimension) {
-            case dimensions.UP:
-                cellConfig.dimension = getRandomDimension([dimensions.DOWN, dimensions.DOWN_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
-                break;
-            case dimensions.UP_AND_LEFT:
-                cellConfig.dimension = dimensions.DOWN_AND_LEFT;
-                break;
-            case dimensions.UP_AND_RIGHT:
-                cellConfig.dimension = dimensions.DOWN_AND_RIGHT;
-                break;
-        }
+        cellConfig.dimension = getRandomDimension([dimensions.DOWN, dimensions.DOWN_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
     }
     function reflectFromBottomBorder(cellConfig) {
-        switch (cellConfig.dimension) {
-            case dimensions.DOWN:
-                cellConfig.dimension = getRandomDimension([dimensions.UP, dimensions.UP_AND_LEFT, dimensions.UP_AND_RIGHT]);
-                break;
-            case dimensions.DOWN_AND_LEFT:
-                cellConfig.dimension = dimensions.UP_AND_LEFT;
-                break;
-            case dimensions.DOWN_AND_RIGHT:
-                cellConfig.dimension = dimensions.UP_AND_RIGHT;
-                break;
-        }
+        cellConfig.dimension = getRandomDimension([dimensions.UP, dimensions.UP_AND_LEFT, dimensions.UP_AND_RIGHT]);
     }
     function reflectFromLeftBorder(cellConfig) {
-        switch (cellConfig.dimension) {
-            case dimensions.LEFT:
-                cellConfig.dimension = getRandomDimension([dimensions.RIGHT, dimensions.UP_AND_RIGHT, dimensions.DOWN_AND_RIGHT]);
-                break;
-            case dimensions.DOWN_AND_LEFT:
-                cellConfig.dimension = dimensions.DOWN_AND_RIGHT;
-                break;
-            case dimensions.UP_AND_LEFT:
-                cellConfig.dimension = dimensions.UP_AND_RIGHT;
-                break;
-        }
+        cellConfig.dimension = getRandomDimension([dimensions.RIGHT, dimensions.UP_AND_RIGHT, dimensions.DOWN_AND_RIGHT]);
     }
     function reflectFromRightBorder(cellConfig) {
-        switch (cellConfig.dimension) {
-            case dimensions.RIGHT:
-                cellConfig.dimension = getRandomDimension([dimensions.LEFT, dimensions.UP_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
-                break;
-            case dimensions.DOWN_AND_RIGHT:
-                cellConfig.dimension = dimensions.DOWN_AND_LEFT;
-                break;
-            case dimensions.UP_AND_RIGHT:
-                cellConfig.dimension = dimensions.UP_AND_LEFT;
-                break;
-        }
+        cellConfig.dimension = getRandomDimension([dimensions.LEFT, dimensions.UP_AND_LEFT, dimensions.DOWN_AND_RIGHT]);
     }
 
     function getCellsConfig(table) {
